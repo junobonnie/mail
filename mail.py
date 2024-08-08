@@ -39,7 +39,7 @@ class Mail:
     def clear(self):
         self.msg = MIMEMultipart()
 
-    def send_email(self):
+    def send(self):
         self.login()
         for mail_ in self.mail_list:
             self.msg['To'] = mail_
@@ -55,4 +55,4 @@ if __name__ == "__main__":
     mail.set_subject("test")
     mail.add_text("hihi")
     #mail.add_img("Lenna.png")
-    mail.send_email()
+    mail.send()
