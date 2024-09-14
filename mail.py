@@ -9,6 +9,7 @@ class Mail:
         self.set_mail_list()
         self.msg = MIMEMultipart()
         self.msg['From'] = self.mail_id
+        self.image_count = 0
 
     def login(self):
         self.server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -31,13 +32,15 @@ class Mail:
          self.msg.attach(text_part)
 
     def add_img(self, image):
+         self.image_count += 1
          with open(image, 'rb') as file:
-             img = MIMEImage(file.read())
-             img.add_header('Content-Disposition', 'attachment', filename=image)
-             self.msg.attach(img)
+             img = MIMEImage(file.read(), name=image)
+         img.add_header('Content-ID', '<image%d>'%(self.image_count))
+         self.msg.attach(img)
 
     def clear(self):
         self.msg = MIMEMultipart()
+        self.image_count = 0
 
     def send(self):
         self.login()
@@ -54,5 +57,9 @@ if __name__ == "__main__":
     mail = Mail()
     mail.set_subject("test")
     mail.add_text("hihi")
-    #mail.add_img("Lenna.png")
+    mail.add_text("hihi")
+    mail.add_text("hihi")
+    mail.add_text("hihi")
+    mail.add_img("Lenna.png")
+    mail.add_img("Lenna.png")
     mail.send()
