@@ -23,7 +23,7 @@ class Mail:
 
     def set_mail_list(self):
         with open("mail.list") as f:
-            self.mail_list = f.readlines()
+            self.mail_list = f.read().splitlines()
 
     def set_subject(self, subject):
         self.msg['Subject'] = subject
@@ -39,7 +39,7 @@ class Mail:
         def replace_link(match):
             url = match.group(0)
             return f'<a href="{url}">{url}</a>'
-        
+
         html_text = re.sub(r'https?://[^\s]+', replace_link, text)
         self.html_body += f'<p>{html_text}</p>\n'
 
@@ -49,8 +49,8 @@ class Mail:
              img = MIMEImage(file.read(), name=image)
          img.add_header('Content-ID', '<image%d>'%(self.image_count))
          self.msg.attach(img)
-         
-    def add_img_url(self, url, scale=0.5):
+
+    def add_img_url(self, url, scale=1.0):
         """
         외부 URL 이미지 본문 삽입
         scale: 0~1 사이, 이미지 크기 비율
@@ -65,15 +65,18 @@ class Mail:
 
     def send(self):
         self.login()
-    
+
         # HTML 본문 생성
         if self.html_body:
             html_part = MIMEText(self.html_body, "html")
             self.msg.attach(html_part)
-    
-        for mail_ in self.mail_list:
-            self.msg['To'] = mail_
-            self.server.sendmail(self.mail_id, mail_, self.msg.as_string())
+
+        # 모든 수신자를 To 헤더에 한 번에 설정
+        self.msg['To'] = ", ".join(self.mail_list)
+
+        # 실제 전송할 때는 리스트 그대로 사용
+        self.server.sendmail(self.mail_id, self.mail_list, self.msg.as_string())
+
         self.clear()
         self.quit()
 
